@@ -1,10 +1,13 @@
-﻿using Microsoft.Win32;
+﻿using IOExtensions;
+using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,30 +26,65 @@ namespace _02_file_copier
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string Source { get; set; }
-        public string Destination { get; set; }
+        private ViewModel viewModel;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            srcTextBox.Text = Source = "C:\\Users\\Vlad\\Desktop\\GitHubDesktopSetup-x64.exe";
-            destTextBox.Text = Destination = "C:\\Users\\Vlad\\Desktop\\New folder";
+            viewModel = new ViewModel()
+            {
+                Source = "C:\\Users\\Vlad\\Desktop\\GitHubDesktopSetup-x64.exe",
+                Destination = "C:\\Users\\Vlad\\Desktop\\New folder",
+                Progress = 0
+            };
+
+            this.DataContext = viewModel;
         }
 
-        private void CopyButtonClick(object sender, RoutedEventArgs e)
+        private async void CopyButtonClick(object sender, RoutedEventArgs e)
         {
             // Copy file from source to destination
 
-            string fileName = Path.GetFileName(Source);
-            string destFilePath = Path.Combine(Destination, fileName);
+            string fileName = Path.GetFileName(viewModel.Source);
+            string destFilePath = Path.Combine(viewModel.Destination, fileName); // folder\fileName
 
-            // type 1 - using File class
-
-            // C:\Users\Vlad\Desktop\New folder\GitHubDesktopSetup-x64.exe
-            File.Copy(Source, destFilePath, true);
+            await CopyFileAsync(viewModel.Source, destFilePath);
 
             MessageBox.Show("Complete!");
+        }
+
+        private Task CopyFileAsync(string src, string dest)
+        {
+            //return Task.Run(() =>
+            //{
+            //    // type 1 - using File class
+            //    //File.Copy(src, dest, true);
+
+            //    // type 2 - FileStream
+            //    using var srcStream = new FileStream(src, FileMode.Open, FileAccess.Read);
+            //    using var destStream = new FileStream(dest, FileMode.Create, FileAccess.Write);
+
+            //    int bytes = 0;
+            //    byte[] buffer = new byte[1024 * 8]; // 8KB
+            //    do
+            //    {
+            //        bytes = srcStream.Read(buffer, 0, buffer.Length);
+            //        destStream.Write(buffer, 0, bytes);
+            //        Thread.Sleep(500);
+
+            //        // % = recieved / total * 100
+            //        float percent = destStream.Length / (srcStream.Length / 100);
+            //        viewModel.Progress = percent;
+
+            //    } while (bytes > 0);
+            //});
+
+            // type 3 - FileTransferManager
+            return FileTransferManager.CopyWithProgressAsync(src, dest, (progress) =>
+            {
+                viewModel.Progress = progress.Percentage;
+            }, false);
         }
 
         private void OpenSourceClick(object sender, RoutedEventArgs e)
@@ -55,8 +93,7 @@ namespace _02_file_copier
             
             if (dialog.ShowDialog() == true)
             {
-                Source = dialog.FileName;
-                srcTextBox.Text = Source;
+                viewModel.Source = dialog.FileName;
             }
         }
         private void OpenDestinationClick(object sender, RoutedEventArgs e)
@@ -66,9 +103,19 @@ namespace _02_file_copier
 
             if(dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                Destination = dialog.FileName;
-                destTextBox.Text = Destination;
+                viewModel.Destination = dialog.FileName;
             }
         }
+    }
+
+    [AddINotifyPropertyChangedInterface]
+    public class ViewModel
+    {
+        public string Source { get; set; }
+        public string Destination { get; set; }
+        public double Progress { get; set; }
+        public bool IsWaiting => Progress == 0;
+
+        // TODO: move methods here
     }
 }
