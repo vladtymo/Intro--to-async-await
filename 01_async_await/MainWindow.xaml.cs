@@ -29,12 +29,12 @@ namespace _01_async_await
 
             //int value = await task;       // wait without freez    
 
-            //int value = await GenerateValueAsync();   // wait and get result without freez
+            int value = await GenerateValueAsync();   // wait and get result without freez
 
             // invoke after the task has completed
             //list.Items.Add(value);
 
-            list.Items.Add(await GenerateValueAsync());
+            list.Items.Add(value);
 
             //MessageBox.Show("Complete!");
         }
