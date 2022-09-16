@@ -1,7 +1,6 @@
 ﻿using IOExtensions;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,9 +33,8 @@ namespace _02_file_copier
 
             viewModel = new ViewModel()
             {
-                Source = "C:\\Users\\Vlad\\Desktop\\GitHubDesktopSetup-x64.exe",
-                Destination = "C:\\Users\\Vlad\\Desktop\\New folder",
-                Progress = 0
+                //Source = "C:\\Users\\Vlad\\Desktop\\GitHubDesktopSetup-x64.exe",
+                //Destination = "C:\\Users\\Vlad\\Desktop\\New folder"
             };
 
             this.DataContext = viewModel;
@@ -44,11 +42,12 @@ namespace _02_file_copier
 
         private async void CopyButtonClick(object sender, RoutedEventArgs e)
         {
-            // Copy file from source to destination
+            // TODO: add validations (File.Exists)
 
             string fileName = Path.GetFileName(viewModel.Source);
             string destFilePath = Path.Combine(viewModel.Destination, fileName); // folder\fileName
 
+            // Copy file from source to destination
             await CopyFileAsync(viewModel.Source, destFilePath);
 
             MessageBox.Show("Complete!");
@@ -106,16 +105,5 @@ namespace _02_file_copier
                 viewModel.Destination = dialog.FileName;
             }
         }
-    }
-
-    [AddINotifyPropertyChangedInterface]
-    public class ViewModel
-    {
-        public string Source { get; set; }
-        public string Destination { get; set; }
-        public double Progress { get; set; }
-        public bool IsWaiting => Progress == 0;
-
-        // TODO: move methods here
     }
 }
