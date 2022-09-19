@@ -1,5 +1,6 @@
 ﻿using IOExtensions;
 using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -32,9 +33,14 @@ namespace _02_file_copier
     [AddINotifyPropertyChangedInterface]
     public class CopyProcessInfo
     {
+        public CopyProcessInfo(string fileName)
+        {
+            this.FileName = fileName;
+        }
         public string FileName { get; set; }
         public double Percentage { get; set; }
         public int PercentageInt => (int)Percentage;
-        public double Speed { get; set; }
+        public double BytesPerSecond { get; set; }
+        public double MegabytesPerSecond => Math.Round(BytesPerSecond / 1024 / 1024, 1);
     }
 }

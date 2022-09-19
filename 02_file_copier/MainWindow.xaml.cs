@@ -48,12 +48,7 @@ namespace _02_file_copier
             string destFilePath = Path.Combine(viewModel.Destination, fileName); // folder\fileName
 
             // create copy process info
-            CopyProcessInfo info = new CopyProcessInfo()
-            {
-                FileName = fileName,
-                Percentage = 0,
-                Speed = 0
-            };
+            CopyProcessInfo info = new CopyProcessInfo(fileName);
 
             // add item to the list
             viewModel.AddProcess(info);
@@ -96,7 +91,7 @@ namespace _02_file_copier
                 //viewModel.TotalProgress = progress.Percentage;
 
                 info.Percentage = progress.Percentage;
-                info.Speed = progress.BytesPerSecond / 1024 / 1024; // MB/s
+                info.BytesPerSecond = progress.BytesPerSecond;   
 
             }, false);
         }
