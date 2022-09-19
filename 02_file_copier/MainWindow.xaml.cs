@@ -33,8 +33,8 @@ namespace _02_file_copier
 
             viewModel = new ViewModel()
             {
-                //Source = "C:\\Users\\Vlad\\Desktop\\GitHubDesktopSetup-x64.exe",
-                //Destination = "C:\\Users\\Vlad\\Desktop\\New folder"
+                Source = "C:\\Users\\Vlad\\Downloads\\10GB.bin",
+                Destination = "C:\\Users\\Vlad\\Desktop\\New folder"
             };
 
             this.DataContext = viewModel;
@@ -47,13 +47,24 @@ namespace _02_file_copier
             string fileName = Path.GetFileName(viewModel.Source);
             string destFilePath = Path.Combine(viewModel.Destination, fileName); // folder\fileName
 
+            // create copy process info
+            CopyProcessInfo info = new CopyProcessInfo()
+            {
+                FileName = fileName,
+                Percentage = 0,
+                Speed = 0
+            };
+
+            // add item to the list
+            viewModel.AddProcess(info);
+
             // Copy file from source to destination
-            await CopyFileAsync(viewModel.Source, destFilePath);
+            await CopyFileAsync(viewModel.Source, destFilePath, info);
 
             MessageBox.Show("Complete!");
         }
 
-        private Task CopyFileAsync(string src, string dest)
+        private Task CopyFileAsync(string src, string dest, CopyProcessInfo info)
         {
             //return Task.Run(() =>
             //{
@@ -82,7 +93,11 @@ namespace _02_file_copier
             // type 3 - FileTransferManager
             return FileTransferManager.CopyWithProgressAsync(src, dest, (progress) =>
             {
-                viewModel.Progress = progress.Percentage;
+                //viewModel.TotalProgress = progress.Percentage;
+
+                info.Percentage = progress.Percentage;
+                info.Speed = progress.BytesPerSecond / 1024 / 1024; // MB/s
+
             }, false);
         }
 
