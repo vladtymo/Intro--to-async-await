@@ -55,6 +55,7 @@ namespace _02_file_copier
 
             // Copy file from source to destination
             await CopyFileAsync(viewModel.Source, destFilePath, info);
+            info.Percentage = 100;
 
             MessageBox.Show("Complete!");
         }
@@ -93,7 +94,7 @@ namespace _02_file_copier
                 info.Percentage = progress.Percentage;
                 info.BytesPerSecond = progress.BytesPerSecond;   
 
-            }, false);
+            }, true);
         }
 
         private void OpenSourceClick(object sender, RoutedEventArgs e)
